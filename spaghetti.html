@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Spaghetti and Meatballs</title>
+	    <script src="js/lib/Three.js"></script>
+	    <style>
+		    body {
+		    	margin: 0;
+		    	overflow: hidden;	
+		    }
+	    </style>
+    </head>
+    <body>
+        
+    </body>
+
+    <script>
+        var SpaghettiView = {
+            opts: {
+                spaghettis: 15,
+                distance: 10,
+                meatballs: 7,
+                meatBallSize: 1
+            },
+            initialize: function(){
+                this.renderThree();
+                // this.renderCube();
+                for (var i = 0; i < this.opts.spaghettis; i++){
+                    this.renderSpaghetti();
+                }
+                for (var i = 0; i < this.opts.meatballs; i++){
+                    this.renderMeatBall();
+                }
+                this.renderMeatBall();
+                this.render();
+
+            },
+            render: function(){
+                document.body.appendChild(this.renderer.domElement);
+                this.renderer.render(this.scene, this.camera);
+            },
+            renderThree: function(){
+        		this.scene = new THREE.Scene();
+        		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        		this.camera.position.x = 15;
+        		this.camera.position.y = 16;
+        		this.camera.position.z = 13;
+
+        		this.camera.lookAt(this.scene.position);
+
+        		this.renderer = new THREE.WebGLRenderer();
+        		this.renderer.setClearColor(0x000000, 0);
+        		this.renderer.setSize(window.innerWidth, window.innerHeight);
+            },
+            renderMeatBall: function(){
+                var self = this;
+                var geometry = new THREE.SphereGeometry(
+                    this.opts.meatBallSize || 1,
+                    10,
+                    10
+                 );
+                function rand() {
+                    return Math.random() * self.opts.distance;
+                }
+                var material = new THREE.MeshNormalMaterial();
+                var sphere = new THREE.Mesh( geometry, material );
+                sphere.position.set(rand(), rand(), rand());
+                this.scene.add( sphere );
+            },
+            renderSpaghetti: function (){
+                var self = this;
+
+                var SinCurve = THREE.Curve.create(
+                    function ( scale ) { //custom curve constructor
+                        this.scale = (scale === undefined) ? 1 : scale;
+                    },
+
+                    function ( t ) { //getPoint: t is between 0-1
+                        var tx = t * 3 - 1.5,
+                            ty = Math.sin( 2 * Math.PI * t ),
+                            tz = 0;
+
+                        return new THREE.Vector3(tx, ty, tz).multiplyScalar(this.scale);
+                    }
+                );
+                function randToTen () {
+                    return Math.random() * self.opts.distance;
+                }
+
+                function randomVector() {
+                    return new THREE.Vector3( randToTen(), randToTen(), randToTen())
+                }
+
+                var curve = new THREE.SplineCurve3( [
+                    randomVector(),
+                    randomVector(),
+                    randomVector(),
+                    randomVector(),
+                    randomVector()
+                ] );
+
+                var path = new SinCurve( 8);
+
+                var spaghettiGeometry = new THREE.TubeGeometry(
+                    curve,  //path
+                    20,    //segments
+                    this.opts.spaghettiRadiues || .3,     //radius
+                    8,     //radiusSegments
+                    false  //closed
+                );
+
+                var spaghettiMaterial = new THREE.MeshNormalMaterial();
+                var spaghetti = new THREE.Mesh(spaghettiGeometry, spaghettiMaterial)
+
+                this.scene.add(spaghetti);
+
+            }
+
+            
+        }
+
+        window.onload = SpaghettiView.initialize();
+
+
+    		// create a cube and add to scene
+    		// var cubeGeometry = new THREE.BoxGeometry(
+      //           10 * Math.random(), 10 * Math.random(), 10 * Math.random());
+
+    		// var cubeMaterial = new THREE.MeshNormalMaterial();
+
+    		// var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+    		// scene.add(cube);
+
+    		// // add the output of the renderer to the html element
+    		// document.body.appendChild(renderer.domElement);
+
+    		// renderer.render(scene, camera);
+    </script>
+</html>
